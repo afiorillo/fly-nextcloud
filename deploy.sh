@@ -11,7 +11,6 @@ source vars.sh
 if [ -z "$(flyctl pg list | grep ${FLY_APP_NAME}-db)" ]; then
    # If the postgres cluster has not already been deployed, deploy it
    flyctl pg create --name ${FLY_APP_NAME}-db \
-                 --organization ${FLY_ORG} \
                  --region ${FLY_APP_REGION} \
                  --vm-size "shared-cpu-1x" \
                  --volume-size 1 \
