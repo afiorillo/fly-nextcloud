@@ -10,6 +10,7 @@ on:
 jobs:
   resize-db-cleanup-s3:
     runs-on: ubuntu-latest
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
 
     env:
       fly_org: ${{ secrets.FLY_ORG }}
