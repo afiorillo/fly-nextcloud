@@ -63,13 +63,15 @@ jobs:
               flyctl launch --name ${{ env.fly_app_name }}-redis \
                          --no-deploy \
                          --org ${{ env.fly_org }} \
-                         --region ${{ env.fly_app_region }}
+                         --region ${{ env.fly_app_region }} \
+                         --yes
 
               # Create volume for redis app
               flyctl volumes create redis_data \
                  --size 1 \
                  --region ${{ env.fly_app_region }} \
-                 --app ${{ env.fly_app_name }}-redis
+                 --app ${{ env.fly_app_name }}-redis \
+                 --yes
 
               # Clean up generated fly.toml config
               rm fly.toml
@@ -101,7 +103,8 @@ jobs:
               flyctl launch --name ${{ env.fly_app_name }} \
                          --no-deploy \
                          --org ${{ env.fly_org }} \
-                         --region ${{ env.fly_app_region }}
+                         --region ${{ env.fly_app_region }} \
+                         --yes
 
               # Scale nextcloud memory to 1GB
               flyctl scale memory 1024
@@ -110,7 +113,8 @@ jobs:
               flyctl volumes create nextcloud_data \
                  --size 1 \
                  --region ${{ env.fly_app_region }} \
-                 --app ${{ env.fly_app_name }}
+                 --app ${{ env.fly_app_name }} \
+                 --yes
 
               # Clean up generated fly.toml config
               rm fly.toml
@@ -129,7 +133,7 @@ jobs:
           sed -i "s/%s3_endpoint%/${{ env.s3_endpoint }}/g" fly.toml
 
           # Deploy Nextcloud
-          flyctl deploy
+          flyctl deploy --yes
 
           # Leave Nextcloud config
           cd ..
