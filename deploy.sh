@@ -8,9 +8,9 @@ source vars.sh
 #################
 
 # Check if the postgres cluster has already been deployed
-if [ -z "$(fly pg list | grep ${FLY_APP_NAME}-db)" ]; then
+if [ -z "$(flyctl pg list | grep ${FLY_APP_NAME}-db)" ]; then
    # If the postgres cluster has not already been deployed, deploy it
-   fly pg create --name ${FLY_APP_NAME}-db \
+   flyctl pg create --name ${FLY_APP_NAME}-db \
                  --organization ${FLY_ORG} \
                  --region ${FLY_APP_REGION} \
                  --vm-size "shared-cpu-1x" \
@@ -24,15 +24,15 @@ fi
 #################
 
 # Check if the Redis app has already been deployed
-if [ -z "$(fly apps list | grep '${FLY_APP_NAME}-redis')" ]; then
+if [ -z "$(flyctl apps list | grep '${FLY_APP_NAME}-redis')" ]; then
    # Create the redis app
-   fly launch --name ${FLY_APP_NAME}-redis \
+   flyctl launch --name ${FLY_APP_NAME}-redis \
               --no-deploy \
               --org ${FLY_ORG} \
               --region ${FLY_APP_REGION}
 
    # Create volume for redis app
-   fly volumes create redis_data \
+   flyctl volumes create redis_data \
       --size 1 \
       --region ${FLY_APP_REGION} \
       --app ${FLY_APP_NAME}-redis
@@ -50,7 +50,7 @@ sed -i "s/%fly_app_name%/${FLY_APP_NAME}/g" fly.toml
 sed -i "s/%fly_redis_password%/${FLY_REDIS_PASSWORD}/g" fly.toml
 
 # Deploy Redis
-fly deploy
+flyctl deploy
 
 # Leave Redis config
 cd ..
@@ -63,18 +63,18 @@ git restore redis/fly.toml
 #################
 
 # Check if the nextcloud app has already been deployed
-if [ -z "$(fly apps list | grep ${FLY_APP_NAME}[^-])" ]; then
+if [ -z "$(flyctl apps list | grep ${FLY_APP_NAME}[^-])" ]; then
     # Create the nextcloud app
-    fly launch --name ${FLY_APP_NAME} \
+    flyctl launch --name ${FLY_APP_NAME} \
                --no-deploy \
                --org ${FLY_ORG} \
                --region ${FLY_APP_REGION}
 
     # Scale nextcloud memory to 1GB
-    fly scale memory 1024
+    flyctl scale memory 1024
 
     # Create volume for redis app
-    fly volumes create nextcloud_data \
+    flyctl volumes create nextcloud_data \
        --size 1 \
        --region ${FLY_APP_REGION} \
        --app ${FLY_APP_NAME}
@@ -96,7 +96,7 @@ sed -i "s/%s3_secret_key%/${S3_SECRET_KEY}/g" fly.toml
 sed -i "s/%s3_endpoint%/${S3_ENDPOINT}/g" fly.toml
 
 # Deploy Nextcloud
-fly deploy
+flyctl deploy
 
 # Leave Nextcloud config
 cd ..

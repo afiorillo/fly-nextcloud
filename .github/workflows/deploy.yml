@@ -3,7 +3,7 @@ on:
   # Allow for running the deployment manually
   workflow_dispatch:
 
-  # Re-deploy the Nextcloud application to Fly on pushes to the main branch
+  # Re-deploy the Nextcloud application to flyctl on pushes to the main branch
   push:
     branches:
       - main
@@ -41,9 +41,9 @@ jobs:
           export FLY_API_TOKEN=${{ env.fly_api_token }}
 
           # Check if the postgres cluster has already been deployed
-          if [ -z "$(fly pg list | grep ${{ env.fly_app_name }}-db)" ]; then
+          if [ -z "$(flyctl pg list | grep ${{ env.fly_app_name }}-db)" ]; then
               # If the postgres cluster has not already been deployed, deploy it
-              fly pg create --name "${{ env.fly_app_name }}-db" \
+              flyctl pg create --name "${{ env.fly_app_name }}-db" \
                             --organization "${{ env.fly_org }}" \
                             --region "${{ env.fly_app_region }}" \
                             --vm-size "shared-cpu-1x" \
@@ -59,15 +59,15 @@ jobs:
           export FLY_API_TOKEN=${{ env.fly_api_token }}
 
           # Check if the Redis app has already been deployed
-          if [ -z "$(fly apps list | grep '${{ env.fly_app_name }}-redis')" ]; then
+          if [ -z "$(flyctl apps list | grep '${{ env.fly_app_name }}-redis')" ]; then
               # Create the redis app
-              fly launch --name ${{ env.fly_app_name }}-redis \
+              flyctl launch --name ${{ env.fly_app_name }}-redis \
                          --no-deploy \
                          --org ${{ env.fly_org }} \
                          --region ${{ env.fly_app_region }}
 
               # Create volume for redis app
-              fly volumes create redis_data \
+              flyctl volumes create redis_data \
                  --size 1 \
                  --region ${{ env.fly_app_region }} \
                  --app ${{ env.fly_app_name }}-redis
@@ -85,7 +85,7 @@ jobs:
           sed -i "s/%fly_redis_password%/${{ env.fly_redis_password }}/g" fly.toml
 
           # Deploy Redis
-          fly deploy
+          flyctl deploy
 
           # Leave Redis config
           cd ..
@@ -97,18 +97,18 @@ jobs:
           export FLY_API_TOKEN=${{ env.fly_api_token }}
 
           # Check if the nextcloud app has already been deployed
-          if [ -z "$(fly apps list | grep '${{ env.fly_app_name }}[^-]')" ]; then
+          if [ -z "$(flyctl apps list | grep '${{ env.fly_app_name }}[^-]')" ]; then
               # Create the nextcloud app
-              fly launch --name ${{ env.fly_app_name }} \
+              flyctl launch --name ${{ env.fly_app_name }} \
                          --no-deploy \
                          --org ${{ env.fly_org }} \
                          --region ${{ env.fly_app_region }}
 
               # Scale nextcloud memory to 1GB
-              fly scale memory 1024
+              flyctl scale memory 1024
 
               # Create volume for redis app
-              fly volumes create nextcloud_data \
+              flyctl volumes create nextcloud_data \
                  --size 1 \
                  --region ${{ env.fly_app_region }} \
                  --app ${{ env.fly_app_name }}
@@ -130,7 +130,7 @@ jobs:
           sed -i "s/%s3_endpoint%/${{ env.s3_endpoint }}/g" fly.toml
 
           # Deploy Nextcloud
-          fly deploy
+          flyctl deploy
 
           # Leave Nextcloud config
           cd ..
